@@ -3,6 +3,7 @@ from rest_framework import views, response, permissions
 from django.contrib.auth import login, logout
 from .authentication import CsrfExemptSessionAuthentication
 from .serializers import LoginSerializer, UserSerializer, RegisterationSerializer
+from .permissions import IsTeacher, IsStudent
 
 
 class LoginView(views.APIView):
@@ -41,3 +42,17 @@ class RegistrationView(views.APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return response.Response(data=serializer.data, status=201)
+
+
+class TeacherPageView(views.APIView):
+    permission_classes = (IsTeacher,)
+
+    def get(self, request):
+        return response.Response(data={'message': 'teacher page'}, status=200)
+
+
+class StudentPageView(views.APIView):
+    permission_classes = (IsStudent,)
+
+    def get(self, request):
+        return response.Response(data={'message': 'student page'}, status=200)
