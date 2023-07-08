@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from rest_framework import views, response, permissions
 from django.contrib.auth import login, logout
 from .authentication import CsrfExemptSessionAuthentication
-from .serializers import LoginSerializer, UserSerializer, RegisterationSerializer
+from .serializers import LoginSerializer, UserSerializer, EditUserSerializer, ChangePasswordSerializer
 from .permissions import IsTeacher, IsStudent
 
 
@@ -34,14 +34,42 @@ class SessionUserView(views.APIView):
         return response.Response(data=serializer.data)
 
 
-class RegistrationView(views.APIView):
-    permission_classes = (permissions.AllowAny,)
+# class RegistrationView(views.APIView):
+#     permission_classes = (permissions.AllowAny,)
+#
+#     def post(self, request):
+#         serializer = RegisterationSerializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+#         serializer.save()
+#         return response.Response(data=serializer.data, status=201)
 
-    def post(self, request):
-        serializer = RegisterationSerializer(data=request.data)
+
+class EditUserView(views.APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request):
+        user = User.objects.get(pk=self.request.user.id)
+        serializer = EditUserSerializer(user)
+        return response.Response(data=serializer.data)
+
+    def put(self, request):
+        user = User.objects.get(pk=self.request.user.id)
+        serializer = EditUserSerializer(user, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return response.Response(data=serializer.data, status=201)
+        return response.Response(data=serializer.data, status=200)
+
+
+class ChangePasswordView(views.APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def put(self, request):
+        user = User.objects.get(pk=self.request.user.id)
+        serializer = ChangePasswordSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        user.set_password(serializer.validated_data['new_password'])
+        user.save()
+        return response.Response(data={'message': 'password changed successfully'}, status=200)
 
 
 class TeacherPageView(views.APIView):
@@ -55,5 +83,4 @@ class StudentPageView(views.APIView):
     permission_classes = (IsStudent,)
 
     def get(self, request):
-
         return response.Response(data={'message': 'student page'}, status=200)
