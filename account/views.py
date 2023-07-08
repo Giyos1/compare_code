@@ -55,4 +55,5 @@ class StudentPageView(views.APIView):
     permission_classes = (IsStudent,)
 
     def get(self, request):
+
         return response.Response(data={'message': 'student page'}, status=200)
