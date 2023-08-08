@@ -9,7 +9,11 @@ class UserSerializer(serializers.ModelSerializer):
     role = serializers.SerializerMethodField()
 
     def get_role(self, obj):
-        return obj.groups.all()[0].name
+        try:
+            role = obj.groups.all()[0].name
+        except:
+            role = None
+        return role
 
     class Meta:
         model = User

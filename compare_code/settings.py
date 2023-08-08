@@ -39,6 +39,7 @@ INSTALLED_APPS = [
 
     # local
     'account',
+    'task',
 
     # 3 rd
     'rest_framework',
